@@ -1,2 +1,2 @@
 # Cell-Segmentation
-![Image](../blob/master/sample_output.png)
+![Image](sample_output.png)
