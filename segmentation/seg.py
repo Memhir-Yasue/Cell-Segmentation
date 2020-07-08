@@ -15,8 +15,13 @@ def bgr_2_gray(img):
 def bgr_2_rgb(img):
     return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
+def rm_green_blue(img):
+    img[:, :, 0] = 0  # blue
+    img[:, :, 1] = 0  # green
+    return img
 
-def apply_mask(img, mask_bgr_min: list, mask_bgr_max: list, morph_open_iter, morph_close_iter):
+
+def apply_mask(img, mask_bgr_min, mask_bgr_max, morph_open_iter, morph_close_iter):
 
     """
     :param img: Grey version
@@ -59,13 +64,14 @@ def count_cells(img, close, min_area, put_count: bool):
     return img, cells
 
 
-def run_segmenter(img_path, mask_bgr_min = [0, 0, 50], mask_bgr_max=[0, 0, 255], morph_open_iter=1, morph_close_iter=5,
+def run_segmenter(img_path, mask_bgr_min=(0, 0, 50), mask_bgr_max=(0, 0, 255), morph_open_iter=1, morph_close_iter=5,
                   min_area=50, put_count=True,):
 
     orig_img = load_image(img_path)
+    img_bgr = orig_img.copy()
+    img_red = rm_green_blue(img_bgr)
     img_rgb = bgr_2_rgb(orig_img)
-    img_gray = bgr_2_gray(orig_img)
-    kernel, img_opening, img_close = apply_mask(img=img_gray, mask_bgr_min=mask_bgr_min, mask_bgr_max=mask_bgr_max,
+    kernel, img_opening, img_close = apply_mask(img=img_red, mask_bgr_min=mask_bgr_min, mask_bgr_max=mask_bgr_max,
                                                 morph_open_iter=morph_open_iter, morph_close_iter=morph_close_iter)
 
     img_out, cell_count = count_cells(img=img_rgb, close=img_close, min_area=min_area, put_count=put_count)
