@@ -1,2 +1,2 @@
 # Cell-Segmentation
-![Image](sample_output.png)
+![Image](images/sample_output.png)
