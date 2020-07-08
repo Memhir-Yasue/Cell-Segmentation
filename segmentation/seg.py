@@ -59,13 +59,14 @@ def count_cells(img, close, min_area, put_count: bool):
     return img, cells
 
 
-def run_segmenter(img_path, mask_bgr_min, mask_bgr_max, morph_open_iter, morph_close_iter, min_area, put_count,):
+def run_segmenter(img_path, mask_bgr_min = [0, 0, 50], mask_bgr_max=[0, 0, 255], morph_open_iter=1, morph_close_iter=5,
+                  min_area=50, put_count=True,):
 
     orig_img = load_image(img_path)
     img_rgb = bgr_2_rgb(orig_img)
     img_gray = bgr_2_gray(orig_img)
     kernel, img_opening, img_close = apply_mask(img=img_gray, mask_bgr_min=mask_bgr_min, mask_bgr_max=mask_bgr_max,
-                                                morph_open_iter=morph_close_iter, morph_close_iter=morph_close_iter)
+                                                morph_open_iter=morph_open_iter, morph_close_iter=morph_close_iter)
 
     img_out, cell_count = count_cells(img=img_rgb, close=img_close, min_area=min_area, put_count=put_count)
 
