@@ -1,6 +1,7 @@
 import math
 
 import cv2
+from matplotlib import pyplot as plt
 import numpy as np
 
 
@@ -15,10 +16,25 @@ def bgr_2_gray(img):
 def bgr_2_rgb(img):
     return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
+
 def rm_green_blue(img):
     img[:, :, 0] = 0  # blue
     img[:, :, 1] = 0  # green
     return img
+
+
+def save_plt(plt_obj, f_name):
+    plt.figure(figsize=(10, 10))
+    plt.imsave(f'static/output/{f_name}', plt_obj)
+    plt.close()
+
+def save_multi_plt(plt_objs, name):
+    fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(20, 20))
+    ax1.imshow(plt_objs[0])
+    ax2.imshow(plt_objs[1])
+    ax3.imshow(plt_objs[2])
+    plt.savefig(f'static/output/{name}', bbox_inches = 'tight')
+    plt.close()
 
 
 def apply_mask(img, mask_bgr_min, mask_bgr_max, morph_open_iter, morph_close_iter):
@@ -36,7 +52,6 @@ def apply_mask(img, mask_bgr_min, mask_bgr_max, morph_open_iter, morph_close_ite
     kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
     opening = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel, iterations=morph_open_iter)
     close = cv2.morphologyEx(opening, cv2.MORPH_CLOSE, kernel, iterations=morph_close_iter)
-
     return kernel, opening, close
 
 
@@ -60,20 +75,22 @@ def count_cells(img, close, min_area, put_count: bool):
                 y = c[0][0][1]
                 cv2.putText(img, f"{cells}", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (194, 255, 0), 2)
 
-    img = bgr_2_rgb(img)
     return img, cells
 
 
 def run_segmenter(img_path, mask_bgr_min=(0, 0, 50), mask_bgr_max=(0, 0, 255), morph_open_iter=1, morph_close_iter=5,
-                  min_area=50, put_count=True,):
+                  min_area=200, w_count=True,):
 
     orig_img = load_image(img_path)
+    orig_img_cpy = orig_img.copy()
     img_bgr = orig_img.copy()
     img_red = rm_green_blue(img_bgr)
-    img_rgb = bgr_2_rgb(orig_img)
     kernel, img_opening, img_close = apply_mask(img=img_red, mask_bgr_min=mask_bgr_min, mask_bgr_max=mask_bgr_max,
                                                 morph_open_iter=morph_open_iter, morph_close_iter=morph_close_iter)
 
-    img_out, cell_count = count_cells(img=img_rgb, close=img_close, min_area=min_area, put_count=put_count)
-
-    return img_out, cell_count
+    img_out, cell_count = count_cells(img=orig_img_cpy, close=img_close, min_area=min_area, put_count=w_count)
+    # save_plt(bgr_2_rgb(orig_img), 'input.png')
+    # save_plt(img_close, 'mask.png')
+    # save_plt(bgr_2_rgb(img_out), 'output.png')
+    save_multi_plt((bgr_2_rgb(orig_img), img_close, bgr_2_rgb(img_out)), 'output.png')
+    return cell_count
