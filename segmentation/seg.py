@@ -28,6 +28,7 @@ def save_plt(plt_obj, f_name):
     plt.imsave(f'static/output/{f_name}', plt_obj)
     plt.close()
 
+
 def save_multi_plt(plt_objs, name):
     fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(20, 20))
     ax1.imshow(plt_objs[0])
@@ -92,5 +93,20 @@ def run_segmenter(img_path, mask_bgr_min=(0, 0, 50), mask_bgr_max=(0, 0, 255), m
     # save_plt(bgr_2_rgb(orig_img), 'input.png')
     # save_plt(img_close, 'mask.png')
     # save_plt(bgr_2_rgb(img_out), 'output.png')
-    save_multi_plt((bgr_2_rgb(orig_img), img_close, bgr_2_rgb(img_out)), 'output.png')
-    return cell_count
+    # save_multi_plt((bgr_2_rgb(orig_img), img_close, bgr_2_rgb(img_out)), 'output.png')
+    return bgr_2_rgb(img_out)
+
+
+def run_merged_segment(img_path, mask_bgr_min=(0, 0, 50), mask_bgr_max=(0, 0, 255), morph_open_iter=1,
+                       morph_close_iter=5, min_area=150, w_count=True,):
+
+    orig_img = load_image(img_path)
+    orig_img_cpy = orig_img.copy()
+    img_red_n_green = orig_img.copy()
+    kernel, img_opening, img_close = apply_mask(img=img_red_n_green, mask_bgr_min=mask_bgr_min,
+                                                mask_bgr_max=mask_bgr_max, morph_open_iter=morph_open_iter,
+                                                morph_close_iter=morph_close_iter)
+
+    img_out, cell_count = count_cells(img=orig_img_cpy, close=img_close, min_area=min_area, put_count=w_count)
+
+    return cell_count, bgr_2_rgb(orig_img), bgr_2_rgb(img_out)

@@ -1,7 +1,7 @@
-<!DOCTYPE html>
-<html>
-<body>
-<h1>Cell count: {{cell_count}}</h1>
-<img src={{ url_for('static', filename='/output/output.png') }}>
-</body>
-</html>
+<!doctype html>
+<title>Upload new File</title>
+<h1>Upload new File</h1>
+<form action= "{{url_for('upload')}}" method="POST" enctype=multipart/form-data>
+  <input type=file name=file>
+  <input type=submit name=file value=Upload>
+</form>
